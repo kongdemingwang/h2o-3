@@ -1,0 +1,30 @@
+{
+  "name": "h2o-mli",
+  "version": "0.0.0",
+  "description": "H2O ML Interpretability UI",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/h2oai/h2o-3"
+  },
+  "keywords": [
+    "H2O",
+    "Machine Learning",
+    "Interpretability"
+  ],
+  "author": "Mark Chan <markc@h2o.ai>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/h2oai/h2o-3/issues"
+  },
+  "homepage": "https://github.com/h2oai/mli",
+  "dependencies": {
+    "@types/zepto": "^1.0.28",
+    "echarts": "^3.5.4",
+    "zepto": "1.2.0"
+  },
+  "devDependencies": {
+    "@types/echarts": "0.0.6"
+  }
+}

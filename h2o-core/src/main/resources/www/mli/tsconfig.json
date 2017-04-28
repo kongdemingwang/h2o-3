@@ -1,0 +1,23 @@
+
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noImplicitUseStrict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noEmitOnError": true,
+    "preserveConstEnums": true,
+    "sourceMap":true,
+    "strictNullChecks": true,
+    "experimentalDecorators": true,
+    "target": "es5"
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
