@@ -9,7 +9,7 @@
     "noUnusedParameters": true,
     "noEmitOnError": true,
     "preserveConstEnums": true,
-    "sourceMap":true,
+    "sourceMap":false,
     "strictNullChecks": true,
     "experimentalDecorators": true,
     "target": "es5"

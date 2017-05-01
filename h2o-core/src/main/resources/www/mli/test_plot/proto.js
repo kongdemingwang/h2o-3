@@ -1,6 +1,4 @@
-//Object.defineProperty(exports, "__esModule", { value: true });
-//import * as echarts from 'echarts';
-//var echarts = require("echarts");
+//import echarts = require("echarts")
 //import ECharts = echarts.ECharts;
 //import EChartOption = echarts.EChartOption;
 function main() {
@@ -9,33 +7,51 @@ function main() {
         url: "http://localhost:54321/3/Vis/Stats",
         data: JSON.stringify({ "graphic": { "type": "stats",
                 "parameters": { "digits": 3, "data": true } },
-            "data": { "uri": "titanic_input.hex" } }),
+            "data": { "uri": "py_19_sid_93bd" } }),
         contentType: "application/json",
         success: function (data) {
             console.log(data);
+            // plot by klime cluster
+            // click / select id value, generate cluster, permanent pinned row for that query
             var myChart = echarts.init(document.getElementById('main'));
-            // specify chart configuration item and data
             var option = {
                 title: {
-                    text: 'ECharts entry example'
+                    text: 'KLime Test'
                 },
-                tooltip: {},
+                tooltip: {
+                    trigger: 'axis'
+                },
                 legend: {
-                    data: ['Sales']
+                    data: ['model predictions', 'klime predictions']
                 },
-                xAxis: {
-                    data: ["shirt", "cardign", "chiffon shirt", "pants", "heels", "socks"]
-                },
+                xAxis: { data: data.columns[data.column_names.indexOf("idx")] },
                 yAxis: {},
                 series: [{
-                        name: 'Sales',
-                        type: 'bar',
-                        data: [5, 20, 36, 10, 10, 20]
-                    }]
+                        name: 'model_pred',
+                        type: 'line',
+                        data: data.columns[data.column_names.indexOf("p1")]
+                    },
+                    {
+                        name: 'klime_pred',
+                        type: 'line',
+                        data: data.columns[data.column_names.indexOf("predict_klime")]
+                    }
+                ].concat(data.column_names.map(function (x) {
+                    if (x.match('^rc_')) {
+                        return {
+                            name: x,
+                            type: 'line',
+                            data: data.columns[data.column_names.indexOf(x)],
+                            showSymbol: false,
+                            symbolSize: 0,
+                            hoverAnimation: false,
+                            lineStyle: { normal: { width: 0 } }
+                        };
+                    }
+                })).filter(function (x) { return x; })
             };
             myChart.setOption(option);
         }
     });
 }
 Zepto(main);
-//# sourceMappingURL=proto.js.map
