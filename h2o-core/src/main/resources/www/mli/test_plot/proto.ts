@@ -1,4 +1,8 @@
-import * as echarts from 'echarts';
+//import * as echarts from 'echarts';
+import echarts = require("echarts")
+//import ECharts = echarts.ECharts;
+//import EChartOption = echarts.EChartOption;
+
 function main():void {
     $.ajax({
         type:"POST",
@@ -10,7 +14,7 @@ function main():void {
         contentType:"application/json",
         success: function(data) {
             console.log(data)
-            var myChart = echarts.init(document.getElementById('main'))
+            var myChart = echarts.init(<HTMLDivElement>document.getElementById('main'))
             // specify chart configuration item and data
             var option = {
               title: {
@@ -31,6 +35,7 @@ function main():void {
                }]
               };
              myChart.setOption(option);
+             
          }
     })
 }

@@ -20,11 +20,9 @@
   },
   "homepage": "https://github.com/h2oai/mli",
   "dependencies": {
+    "@types/echarts": "0.0.6",
     "@types/zepto": "^1.0.28",
     "echarts": "^3.5.4",
-    "zepto": "1.2.0"
-  },
-  "devDependencies": {
-    "@types/echarts": "0.0.6"
+    "zepto": "^1.2.0"
   }
 }
