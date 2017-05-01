@@ -1,6 +1,3 @@
-//import echarts = require("echarts")
-//import ECharts = echarts.ECharts;
-//import EChartOption = echarts.EChartOption;
 function main() {
     $.ajax({
         type: "POST",
@@ -25,7 +22,7 @@ function main() {
                     data: ['model predictions', 'klime predictions']
                 },
                 xAxis: { data: data.columns[data.column_names.indexOf("idx")] },
-                yAxis: {},
+                yAxis: { min: -0.1 },
                 series: [{
                         name: 'model_pred',
                         type: 'line',

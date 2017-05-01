@@ -28,7 +28,7 @@ function main():void {
                     data: ['model predictions', 'klime predictions']
                 },
                 xAxis: {data: data.columns[data.column_names.indexOf("idx")]},
-                yAxis: {},
+                yAxis: {min:-0.1},
                 series: [{
                         name: 'model_pred',
                         type: 'line',
