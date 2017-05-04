@@ -1,10 +1,10 @@
-function main() {
+function plot_klime(frame_key) {
     $.ajax({
         type: "POST",
         url: "http://localhost:54321/3/Vis/Stats",
         data: JSON.stringify({ "graphic": { "type": "stats",
                 "parameters": { "digits": 3, "data": true } },
-            "data": { "uri": "py_19_sid_93bd" } }),
+            "data": { "uri": frame_key } }),
         contentType: "application/json",
         success: function (data) {
             console.log(data);
@@ -49,6 +49,15 @@ function main() {
             };
             myChart.setOption(option);
         }
+    });
+}
+function main() {
+    var params = new URLSearchParams(document.location.search);
+    var interpret_key = params.get("interpret_key");
+    $.get("http://localhost:54321/3/InterpretModel/" + interpret_key, function (data) {
+        var frame_id = data.frame_id.name;
+        console.log(frame_id);
+        plot_klime(frame_id);
     });
 }
 Zepto(main);
