@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.URI;
 import java.util.*;
 
+import hex.Interpret;
 import hex.Model;
 import hex.ModelMojoWriter;
 import hex.PartialDependence;
@@ -175,10 +176,25 @@ public class ModelsHandler<I extends ModelsHandler.Models, S extends SchemaV3<I,
     return new JobV3(partialDependence.execImpl());
   }
 
+  public JobV3 makeInterpretModel(int version, InterpretV3 s) {
+    Interpret interpret;
+    if (s.destination_key != null)
+      interpret = new Interpret(s.destination_key.key());
+    else
+      interpret = new Interpret(Key.<Interpret>make());
+    s.fillImpl(interpret); //fill frame_id/model_id/nbins/etc.
+    return new JobV3(interpret.execImpl());
+  }
+
   @SuppressWarnings("unused") // called from the RequestServer through reflection
   public PartialDependenceV3 fetchPartialDependence(int version, KeyV3.PartialDependenceKeyV3 s) {
     PartialDependence partialDependence = DKV.getGet(s.key());
     return new PartialDependenceV3().fillFromImpl(partialDependence);
+  }
+
+  public InterpretV3 fetchInterpretModel(int version, KeyV3.InterpretKeyV3 s) {
+    Interpret interpret = DKV.getGet(s.key());
+    return new InterpretV3().fillFromImpl(interpret);
   }
 
   /** Remove an unlocked model.  Fails if model is in-use. */

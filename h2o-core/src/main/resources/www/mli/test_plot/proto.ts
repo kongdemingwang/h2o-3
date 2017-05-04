@@ -1,7 +1,4 @@
 import * as echarts from 'echarts';
-//import echarts = require("echarts")
-//import ECharts = echarts.ECharts;
-//import EChartOption = echarts.EChartOption;
 
 function main():void {
     $.ajax({
