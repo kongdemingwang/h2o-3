@@ -26,7 +26,7 @@ function plot_klime(frame_key) {
                 series: [{
                         name: 'model_pred',
                         type: 'line',
-                        data: data.columns[data.column_names.indexOf("p1")]
+                        data: data.columns[data.column_names.indexOf("model_pred")]
                     },
                     {
                         name: 'klime_pred',
@@ -55,7 +55,7 @@ function main() {
     var params = new URLSearchParams(document.location.search);
     var interpret_key = params.get("interpret_key");
     $.get("/3/InterpretModel/" + interpret_key, function (data) {
-        var frame_id = data.frame_id.name;
+        var frame_id = data.interpret_id.name;
         console.log(frame_id);
         plot_klime(frame_id);
     });

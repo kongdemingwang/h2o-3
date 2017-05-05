@@ -1,8 +1,9 @@
-package water.api.schemas3;
+package water.api;
 
 import hex.Interpret;
 import water.Key;
-import water.api.API;
+import water.api.schemas3.KeyV3;
+import water.api.schemas3.SchemaV3;
 
 /**
  * Partial dependence plot
@@ -21,7 +22,7 @@ public class InterpretV3 extends SchemaV3<Interpret, InterpretV3> {
   public KeyV3.FrameKeyV3 interpret_id;
 
   @API(help="Key to store the destination", direction=API.Direction.INPUT)
-  public KeyV3.InterpretKeyV3 destination_key;
+  public InterpretKeyV3 destination_key;
 
   @Override public Interpret createImpl( ) { return new Interpret(Key.<Interpret>make()); }
 }

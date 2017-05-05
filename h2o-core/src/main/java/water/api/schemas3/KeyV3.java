@@ -1,6 +1,5 @@
 package water.api.schemas3;
 
-import hex.Interpret;
 import hex.Model;
 import hex.PartialDependence;
 import hex.grid.Grid;
@@ -112,10 +111,7 @@ public class KeyV3<I extends Iced, S extends KeyV3<I, S, K>, K extends Keyed> ex
     public PartialDependenceKeyV3() {}
     public PartialDependenceKeyV3(Key<PartialDependence> key) { super(key); }
   }
-  public static class InterpretKeyV3 extends KeyV3<Iced, InterpretKeyV3, Interpret> {
-    public InterpretKeyV3() {}
-    public InterpretKeyV3(Key<Interpret> key) { super(key); }
-  }
+
 
 
   @Override public S fillFromImpl(Iced i) {

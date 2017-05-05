@@ -221,13 +221,14 @@ public class RegisterV3Api extends AbstractRegister {
         "GET /3/PartialDependence/{name}", ModelsHandler.class, "fetchPartialDependence",
         "Fetch partial dependence data.");
 
-    RequestServer.registerEndpoint("interpretModel",
+    /*RequestServer.registerEndpoint("interpretModel",
             "POST /3/InterpretModel/", ModelsHandler.class, "makeInterpretModel",
             "Run Interpretability algorithms on specified model and frame.");
 
     RequestServer.registerEndpoint("fetchInterpretModel",
             "GET /3/InterpretModel/{name}", ModelsHandler.class, "fetchInterpretModel",
             "Fetch interpret model data.");
+            */
 
     // Model serialization - import/export calls
     RequestServer.registerEndpoint("importModel",
