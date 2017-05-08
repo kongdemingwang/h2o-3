@@ -22,6 +22,8 @@ public class Interpret extends Lockable<Interpret> {
   public Key<Model> _model_id;
   public Key<Frame> _frame_id;
   public Key<Frame> _interpret_id; //OUTPUT
+  public KLimeModel kLimeModel;
+  public Frame _interpret_frame;
 
   public Interpret(Key<Interpret> dest) {
     super(dest);
@@ -53,7 +55,7 @@ public class Interpret extends Lockable<Interpret> {
         Log.info("Using Training Frame for KLime");
         _frame_id = m._parms._train;
     }
-    final Frame fr = _frame_id.get();
+    //final Frame fr = _frame_id.get();
   }
 
   private class InterpretDriver extends H2O.H2OCountedCompleter<InterpretDriver> {
@@ -62,46 +64,55 @@ public class Interpret extends Lockable<Interpret> {
       final Frame fr = _frame_id.get();
       final Model m = _model_id.get();
       try {
-        //Scope.enter();
+        Scope.enter();
+        //fr.write_lock();
+        //fr.update();
         _job.update(0,"Scoring frame:" + _frame_id.toString());
-        //Frame modelPreds = Scope.track(m.score(fr,null,_job,false));
-        Frame modelPreds = m.score(fr,null,_job,false);
-        //fr.add(modelPreds.subframe(new String[]{"p1"}));
+        Frame modelPreds = Scope.track(m.score(fr,null,_job,false));
         fr.add(new Frame(new String[]{"model_pred"},new Vec[]{modelPreds.vec(2)}));
         Key<Model> klimeModelKey = Key.make();
+
         _job.update(1,"Running KLime:");
         Job klimeJob = new Job<>(klimeModelKey,ModelBuilder.javaName("klime"), "Interpret with KLime");
+
         KLime klBuilder = ModelBuilder.make("klime",klimeJob,klimeModelKey);
-        klBuilder._parms._ignored_columns = (String[]) ArrayUtils.addAll(m._parms._ignored_columns, new String[]{m._parms._response_column});
-        klBuilder._parms._max_k = 6;
+        klBuilder._parms._ignored_columns = (String[]) ArrayUtils
+                .addAll(m._parms._ignored_columns, new String[]{m._parms._response_column});
+        //klBuilder._parms._max_k = 12;
         klBuilder._parms._seed = 12345;
         //klBuilder._parms._distribution = m._parms._distribution;
-        klBuilder._parms._estimate_k = false;
+        klBuilder._parms._estimate_k = true;
         klBuilder._parms._response_column = "model_pred";
         klBuilder._parms._train = _frame_id;
-        KLimeModel kLimeModel = klBuilder.trainModel().get();
-        Key<Frame> interpretFrameKey = Key.<Frame>make();
+        kLimeModel = klBuilder.trainModel().get();
+
+        Key<Frame> klimePredKey = Key.<Frame>make();
         _job.update(2,"Scoring KLime:");
-        //Frame interpretFrame = Scope.track(kLimeModel.score(fr,interpretFrameKey.toString(),_job,false));
-        Frame interpretFrame = kLimeModel.score(fr,interpretFrameKey.toString(),_job,false);
-        interpretFrame.add(new Frame(new String[]{"model_pred"},new Vec[]{modelPreds.vec(2)}));
-        DKV.put(interpretFrame);
+        Frame klimeFrame = Scope.track(kLimeModel.score(fr,klimePredKey.toString(),_job,false));
+        klimeFrame.add(new Frame(new String[]{"model_pred"},new Vec[]{modelPreds.vec(2)}));
+        DKV.put(klimeFrame);
         _job.update(3,"Preparing frame plot");
-        String rapidsRoundCmd = "(append " + interpretFrameKey + " (floor (* (round (cols_py " + interpretFrameKey + " \'model_pred\') 6) 1000000)) \'pred_score\')";
-        //Frame tmpFrame = Scope.track(Rapids.exec(rapidsRoundCmd).getFrame());
-        Frame tmpFrame = Rapids.exec(rapidsRoundCmd).getFrame();
-        Frame tmpFrame2 = tmpFrame.sort(new int[]{ArrayUtils.indexOf(tmpFrame._names, "pred_score")});
+        String rapidsRoundCmd = "(append " + klimePredKey + " (floor (* (round (cols_py " + klimePredKey +
+                " \'model_pred\') 6) 1000000)) \'pred_score\')";
+        Frame tmpFrame = Scope.track(Rapids.exec(rapidsRoundCmd).getFrame());
+        fr.remove("model_pred");
+        Frame tmpFrame2 = Scope.track(tmpFrame.sort(new int[]{ArrayUtils.indexOf(tmpFrame._names, "pred_score")}));
         tmpFrame2.add(new Frame(new String[]{"ones"},
                 new Vec[]{tmpFrame2.anyVec().makeCon(1.0)}));
         tmpFrame2._key = Key.<Frame>make();
         DKV.put(tmpFrame2);
-        String rapidsIdxCmd = "(append " + tmpFrame2._key + " (cumsum (cols_py " + tmpFrame2._key + " \'ones\') 0) \'idx\')";
-        Frame tmpFrame3 = Rapids.exec(rapidsIdxCmd).getFrame();
-        tmpFrame3._key = Key.<Frame>make();
-        DKV.put(tmpFrame3);
-        _interpret_id = tmpFrame3._key;
+        String rapidsIdxCmd = "(append " + tmpFrame2._key + " (cumsum (cols_py " + tmpFrame2._key +
+                " \'ones\') 0) \'idx\')";
+        _interpret_frame = Scope.track(Rapids.exec(rapidsIdxCmd).getFrame());
+
+        DKV.remove(tmpFrame2._key);
+
+        _interpret_frame._key = Key.<Frame>make();
+        DKV.put(_interpret_frame);
+        _interpret_id = _interpret_frame._key;
       } finally {
-        //Scope.exit();
+        Scope.exit();
+        //fr.unlock();
       }
       _job.update(3);
       update(_job);

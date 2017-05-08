@@ -16,7 +16,7 @@ namespace ModelInterpretability {
                 console.log(data)
                 // plot by klime cluster
                 // click / select id value, generate cluster, permanent pinned row for that query
-                const myChart = ECharts.init(<HTMLDivElement>document.getElementById('main'))
+                const myChart = echarts.init(<HTMLDivElement>document.getElementById('main'))
                 const option = {
                     title: {
                         text: 'KLime Test'

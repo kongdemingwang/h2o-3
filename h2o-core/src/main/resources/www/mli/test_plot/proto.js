@@ -16,7 +16,7 @@ var ModelInterpretability;
                 console.log(data);
                 // plot by klime cluster
                 // click / select id value, generate cluster, permanent pinned row for that query
-                var myChart = ECharts.init(document.getElementById('main'));
+                var myChart = echarts.init(document.getElementById('main'));
                 var option = {
                     title: {
                         text: 'KLime Test'
