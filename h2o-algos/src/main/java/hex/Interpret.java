@@ -1,5 +1,7 @@
 package hex;
 
+import hex.aggregator.Aggregator;
+import hex.aggregator.AggregatorModel;
 import hex.klime.KLimeModel;
 import jsr166y.CountedCompleter;
 import org.apache.commons.lang.ArrayUtils;
@@ -18,12 +20,16 @@ import java.util.Arrays;
  * If randomize = true, then the frame is filled with Random values.
  */
 public class Interpret extends Lockable<Interpret> {
+  final static int MAX_POINTS = 5000;
   transient final public Job _job;
   public Key<Model> _model_id;
   public Key<Frame> _frame_id;
   public Key<Frame> _interpret_id; //OUTPUT
   public KLimeModel kLimeModel;
+  public AggregatorModel agg;
   public Frame _interpret_frame;
+  public Frame _klimeFrame;
+  public Frame _modelPreds;
 
   public Interpret(Key<Interpret> dest) {
     super(dest);
@@ -64,55 +70,66 @@ public class Interpret extends Lockable<Interpret> {
       final Frame fr = _frame_id.get();
       final Model m = _model_id.get();
       try {
-        Scope.enter();
-        //fr.write_lock();
-        //fr.update();
         _job.update(0,"Scoring frame:" + _frame_id.toString());
-        Frame modelPreds = Scope.track(m.score(fr,null,_job,false));
-        fr.add(new Frame(new String[]{"model_pred"},new Vec[]{modelPreds.vec(2)}));
+        _modelPreds = m.score(fr,null,_job,false);
+        fr.add(new Frame(new String[]{"model_pred"},new Vec[]{_modelPreds.vec(2)}));
         Key<Model> klimeModelKey = Key.make();
 
         _job.update(1,"Running KLime:");
         Job klimeJob = new Job<>(klimeModelKey,ModelBuilder.javaName("klime"), "Interpret with KLime");
 
+        // Run KLime
         KLime klBuilder = ModelBuilder.make("klime",klimeJob,klimeModelKey);
         klBuilder._parms._ignored_columns = (String[]) ArrayUtils
                 .addAll(m._parms._ignored_columns, new String[]{m._parms._response_column});
-        //klBuilder._parms._max_k = 12;
         klBuilder._parms._seed = 12345;
-        //klBuilder._parms._distribution = m._parms._distribution;
         klBuilder._parms._estimate_k = true;
         klBuilder._parms._response_column = "model_pred";
         klBuilder._parms._train = _frame_id;
         kLimeModel = klBuilder.trainModel().get();
-
         Key<Frame> klimePredKey = Key.<Frame>make();
         _job.update(2,"Scoring KLime:");
-        Frame klimeFrame = Scope.track(kLimeModel.score(fr,klimePredKey.toString(),_job,false));
-        klimeFrame.add(new Frame(new String[]{"model_pred"},new Vec[]{modelPreds.vec(2)}));
-        DKV.put(klimeFrame);
-        _job.update(3,"Preparing frame plot");
-        String rapidsRoundCmd = "(append " + klimePredKey + " (floor (* (round (cols_py " + klimePredKey +
-                " \'model_pred\') 6) 1000000)) \'pred_score\')";
-        Frame tmpFrame = Scope.track(Rapids.exec(rapidsRoundCmd).getFrame());
-        fr.remove("model_pred");
-        Frame tmpFrame2 = Scope.track(tmpFrame.sort(new int[]{ArrayUtils.indexOf(tmpFrame._names, "pred_score")}));
-        tmpFrame2.add(new Frame(new String[]{"ones"},
-                new Vec[]{tmpFrame2.anyVec().makeCon(1.0)}));
+        _klimeFrame = kLimeModel.score(fr,klimePredKey.toString(),_job,false);
+        _klimeFrame.add(new Frame(new String[]{"model_pred"},new Vec[]{_modelPreds.vec(2)}));
+        DKV.put(_klimeFrame);
+        // Keep the KLimeFrame for user lookups
+
+
+        // Prep Plotting Frame
+        _job.update(2,"Preparing frame plot");
+        AggregatorModel.AggregatorParameters parms = new AggregatorModel.AggregatorParameters();
+        parms._train = _klimeFrame._key;
+        long start = System.currentTimeMillis();
+        agg = new Aggregator(parms).trainModel().get();
+        System.out.println("AggregatorModel finished in: " + (System.currentTimeMillis() - start)/1000. + " seconds");
+        agg.checkConsistency();
+
+        // Sort the aggregated frame
+        String rapidsRoundCmd = "(append " + agg._output._output_frame + " (floor (* (round (cols_py " +
+                agg._output._output_frame + " \'model_pred\') 6) 1000000)) \'pred_score\')";
+        Frame tmpFrame2 = Rapids.exec(rapidsRoundCmd).getFrame();
         tmpFrame2._key = Key.<Frame>make();
         DKV.put(tmpFrame2);
-        String rapidsIdxCmd = "(append " + tmpFrame2._key + " (cumsum (cols_py " + tmpFrame2._key +
+        Frame tmpFrame3 = tmpFrame2.sort(new int[]{ArrayUtils.indexOf(tmpFrame2._names, "pred_score")});
+        tmpFrame2.remove();
+        tmpFrame3.add(new Frame(new String[]{"ones"},
+                new Vec[]{tmpFrame3.anyVec().makeCon(1.0)}));
+        tmpFrame3._key = Key.<Frame>make();
+        DKV.put(tmpFrame3);
+
+        String rapidsIdxCmd = "(append " + tmpFrame3._key + " (cumsum (cols_py " + tmpFrame3._key +
                 " \'ones\') 0) \'idx\')";
-        _interpret_frame = Scope.track(Rapids.exec(rapidsIdxCmd).getFrame());
-
-        DKV.remove(tmpFrame2._key);
-
+        _interpret_frame = Rapids.exec(rapidsIdxCmd).getFrame();
+        _interpret_frame.remove("pred_score").remove();
+        _interpret_frame.remove("ones").remove();
         _interpret_frame._key = Key.<Frame>make();
         DKV.put(_interpret_frame);
         _interpret_id = _interpret_frame._key;
+
+        tmpFrame3.remove();
       } finally {
-        Scope.exit();
-        //fr.unlock();
+        fr.remove("model_pred");
+        DKV.put(fr); //update the DKV
       }
       _job.update(3);
       update(_job);

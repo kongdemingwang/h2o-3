@@ -2,7 +2,7 @@ namespace ModelInterpretability {
     function plot_klime(frame_key: string) {
         $.ajax({
             type: "POST",
-            url: "/3/Vis/Stats",
+            url: "http://localhost:54321/3/Vis/Stats",
             data: JSON.stringify({
                 "graphic":
                 {
@@ -16,7 +16,7 @@ namespace ModelInterpretability {
                 console.log(data)
                 // plot by klime cluster
                 // click / select id value, generate cluster, permanent pinned row for that query
-                const myChart = echarts.init(<HTMLDivElement>document.getElementById('main'))
+                const myChart = ECharts.init(<HTMLDivElement>document.getElementById('main'))
                 const option = {
                     title: {
                         text: 'KLime Test'
@@ -61,7 +61,7 @@ namespace ModelInterpretability {
     export function main(): void {
         const params = new URLSearchParams(document.location.search)
         const interpret_key = params.get("interpret_key")
-        $.get("/3/InterpretModel/" + interpret_key,
+        $.get("http://localhost:54321/3/InterpretModel/" + interpret_key,
             function (data) {
                 var frame_id = data.interpret_id.name
                 console.log(frame_id)
