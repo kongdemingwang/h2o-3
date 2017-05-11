@@ -83,7 +83,9 @@ public class Interpret extends Lockable<Interpret> {
         klBuilder._parms._ignored_columns = (String[]) ArrayUtils
                 .addAll(m._parms._ignored_columns, new String[]{m._parms._response_column});
         klBuilder._parms._seed = 12345;
-        klBuilder._parms._estimate_k = true;
+        klBuilder._parms._estimate_k = false;
+        klBuilder._parms._max_k = 8;
+
         klBuilder._parms._response_column = "model_pred";
         klBuilder._parms._train = _frame_id;
         kLimeModel = klBuilder.trainModel().get();
@@ -99,6 +101,9 @@ public class Interpret extends Lockable<Interpret> {
         _job.update(2,"Preparing frame plot");
         AggregatorModel.AggregatorParameters parms = new AggregatorModel.AggregatorParameters();
         parms._train = _klimeFrame._key;
+        parms._ignored_columns = (String[]) ArrayUtils.addAll(m._parms._ignored_columns,
+          new String[]{"model_pred"});
+        Log.info("Aggregator ignored columns: " + parms._ignored_columns.toString());
         long start = System.currentTimeMillis();
         agg = new Aggregator(parms).trainModel().get();
         System.out.println("AggregatorModel finished in: " + (System.currentTimeMillis() - start)/1000. + " seconds");

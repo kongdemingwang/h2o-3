@@ -4,8 +4,31 @@
     <script src="node_modules/zepto/dist/zepto.min.js"></script>
     <script src="proto.js"></script>
     <script src="node_modules/echarts/dist/echarts.min.js"></script>
+    <script src="node_modules/echarts/dist/echarts.min.js"></script>
+    <script src="node_modules/underscore/underscore-min.js"></script>
+    <!--<link rel="stylesheet" href="../../flow/css/flow-lib.css" type="text/css">-->
+    <!--<link rel="stylesheet" href="../../flow/css/flow.css" type="text/css">-->
+    <link rel="stylesheet" href="css/flow-lib.css" type="text/css">
+    <link rel="stylesheet" href="css/flow.css" type="text/css">
 </head>
 <body>
-<div id="main" style="width: 1200px;height:600px;"></div>
+    <div class="flow-box-header" style="margin-left:50px">
+        <div class="container-fluid"> 
+            <div class="flow-navbar">
+                <div class="navbar-header">
+                    <span class="navbar-brand flow-logo"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="plot_div">
+    <div id="row_search", style="margin-left:50px;margin-top:20px"> 
+            Single Row Lookup<br>
+            Column: <select id="columns"> </select>
+            Value:  <input  id="search-value" type="text" name="value">
+            <button id="search-trigger">Search</button>
+    </div>
+    <div id="main" style="width: 1200px;height:600px;margin-top:20px"></div>
+    </div>
 </body>
 </html>

@@ -22,7 +22,9 @@
   "dependencies": {
     "@types/echarts": "0.0.6",
     "@types/zepto": "^1.0.28",
+    "@types/underscore": "^1.8.0",
     "echarts": "^3.5.4",
-    "zepto": "^1.2.0"
+    "zepto": "^1.2.0",
+    "underscore": "1.8.3"
   }
 }
