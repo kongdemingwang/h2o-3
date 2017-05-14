@@ -6,7 +6,7 @@ import water.api.schemas3.KeyV3;
 import water.api.schemas3.SchemaV3;
 
 /**
- * Partial dependence plot
+ * Interpret Job Schema
  */
 public class InterpretV3 extends SchemaV3<Interpret, InterpretV3> {
   @SuppressWarnings("unused")
@@ -16,6 +16,10 @@ public class InterpretV3 extends SchemaV3<Interpret, InterpretV3> {
   @SuppressWarnings("unused")
   @API(help="Frame", direction=API.Direction.INOUT)
   public KeyV3.FrameKeyV3 frame_id;
+
+  @SuppressWarnings("unused")
+  @API(help="Frame", direction=API.Direction.INOUT)
+  public KeyV3.FrameKeyV3 klime_frame_id;
 
   @SuppressWarnings("unused")
   @API(help="Interpret Frame", direction=API.Direction.OUTPUT)

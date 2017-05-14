@@ -71,6 +71,7 @@ public class RegisterAlgos extends water.api.AbstractRegister {
 
     H2O.register("POST /3/LeaveOneCovarOut", LeaveOneCovarOutHandler.class, "getLoco","loco",
             "Conduct Leave One Covariate Out (LOCO) Analysis");
+
     H2O.register("POST /3/InterpretModel/", InterpretHandler.class,"makeInterpretModel","makeInterpretModel",
             "Run Interpretability algorithms on specified model and frame.");
 

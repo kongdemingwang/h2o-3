@@ -25,6 +25,7 @@ public class Interpret extends Lockable<Interpret> {
   public Key<Model> _model_id;
   public Key<Frame> _frame_id;
   public Key<Frame> _interpret_id; //OUTPUT
+  public Key<Frame> _klime_frame_id;
   public KLimeModel kLimeModel;
   public AggregatorModel agg;
   public Frame _interpret_frame;
@@ -89,9 +90,9 @@ public class Interpret extends Lockable<Interpret> {
         klBuilder._parms._response_column = "model_pred";
         klBuilder._parms._train = _frame_id;
         kLimeModel = klBuilder.trainModel().get();
-        Key<Frame> klimePredKey = Key.<Frame>make();
+        _klime_frame_id = Key.<Frame>make();
         _job.update(2,"Scoring KLime:");
-        _klimeFrame = kLimeModel.score(fr,klimePredKey.toString(),_job,false);
+        _klimeFrame = kLimeModel.score(fr,_klime_frame_id.toString(),_job,false);
         _klimeFrame.add(new Frame(new String[]{"model_pred"},new Vec[]{_modelPreds.vec(2)}));
         DKV.put(_klimeFrame);
         // Keep the KLimeFrame for user lookups
